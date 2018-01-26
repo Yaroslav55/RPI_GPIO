@@ -1,8 +1,8 @@
 /*
  *  GPIO lib for Raspberry PI
- *  https://github.com/
- *                          Dev Yaroslav
- *                                  24.01.18
+ *  https://github.com/Yaroslav55/RPI_GPIO
+ *                      Dev Yaroslav
+ *                              24.01.18
  */
 #include <iostream>
 #include <fstream>

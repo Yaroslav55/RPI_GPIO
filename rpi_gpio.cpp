@@ -1,8 +1,8 @@
 /*
  *  GPIO lib for Raspberry PI
- *  https://github.com/
- *                          Dev Yaroslav
- *                                  24.01.18
+ *  https://github.com/Yaroslav55/RPI_GPIO
+ *                      Dev Yaroslav
+ *                              24.01.18
  */
 #include "rpi_gpio.h"
 rpi_gpio::rpi_gpio()
@@ -10,9 +10,9 @@ rpi_gpio::rpi_gpio()
 }
 rpi_gpio::~rpi_gpio()
 {
-//    for (int i = 0; i < activePin.size(); i++) {
-//        close(activePin[i]);
-//    }
+    for (int i = 0; i < activePin.size(); i++) {
+        close(activePin[i]);
+    }
 }
 void rpi_gpio::rasspberry_model(model mdl)
 {
@@ -56,17 +56,15 @@ int rpi_gpio::open(int gpioPin, std::string gpio_direction)
     }
     file << gpioPin;
     file.close();
-//    std::ofstream dir;
-//    /**********GPIO direction**********/
-//    pinDir << "/direction";
-//    dir.open(pinDir.str().c_str(), std::ios_base::in);
-//    if (!dir.is_open()) {
-//        //close(gpioPin);
-//        return printError("Error opening GPIO direction file! " + pinDir.str());
-//    }
-//    std::cout << gpio_direction <<std::endl;
-//    dir << gpio_direction;
-//    dir.close();
+    /**********GPIO direction**********/
+    pinDir << "/direction";
+    file.open(pinDir.str().c_str(), std::ios_base::in);
+    if (!file.is_open()) {
+        close(gpioPin);
+        return printError("Error opening GPIO direction file!(Possibly you not have a root) " + pinDir.str());
+    }
+    file << gpio_direction;
+    file.close();
 
     activePin.push_back(gpioPin);
 
