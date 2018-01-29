@@ -10,17 +10,15 @@ Example
 #include "rpi_gpio.h"
 int main(void)
 {
-    /* Add RPI_GPIO*class */
-    rpi_gpio gpio;
-    /* Set Raspberry Pi model */
-    gpio.rasspberry_model(GPIO_RPI2_B);
-    /* Open GPIO 26 with out direction */
-    gpio.open(26, GPIO_DIR_OUT);
-    /* Write value in 26 pin*/
-    gpio.write(26, true);
-    /* Read value in 26 pin*/
-    gpio.read(26);
-    
+    rpi_gpio led(26, GPIO_DIR_OUT);
+    for(int i = 0;i < 10; i++){
+        led.write(true);
+        usleep(1 *1000000);
+        
+        led.write(false);
+        usleep(1 *1000000);
+    }
+
     return 0;
 }
 ```
