@@ -21,26 +21,18 @@ typedef enum{
 
 class rpi_gpio {
     public:
-        rpi_gpio();
+        rpi_gpio(int gpioPin, std::string value);
         ~rpi_gpio();
         /* Primary Functions */
-        void rasspberry_model(model mdl);
-        int open(int gpioPin, std::string gpio_direction);
-        int close(int gpioPin);
-        int write(int gpioPin, bool value);
-        int read(int gpioPin);
-        /* Other */
-        int printError(std::string error_mes);
-        int checkPin(int gpioPin);
-
+        int close();
+        int write(bool value);
+        int read();
     private:
+        int gPin;
         std::ofstream file;
-        int rpiModel = -1;
-        std::vector<int> activePin;
-        int RPI_GPIO[2][26] = {
-            { 2, 3, 4, 17, 27, 22, 10, 9, 11, 5, 6, 13, 19, 26, 14,15, 18, 23, 24, 25, 8, 7, 12, 16, 20, 21},
-            { 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 2, 22, 22, 22, 22, 22, 22, 22, 22, 22}
-        };
+        /* Other */
+        int open(int gpioPin, std::string gpio_direction);
+        int printError(std::string error_mes);
     };
 
 #endif // GPIO_H

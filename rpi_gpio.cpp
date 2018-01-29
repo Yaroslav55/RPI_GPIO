@@ -5,18 +5,14 @@
  *                              24.01.18
  */
 #include "rpi_gpio.h"
-rpi_gpio::rpi_gpio()
+rpi_gpio::rpi_gpio(int gpioPin, std::string value)
 {
+    gPin = gpioPin;
+    open(gPin, value);
 }
 rpi_gpio::~rpi_gpio()
 {
-    for (int i = 0; i < activePin.size(); i++) {
-        close(activePin[i]);
-    }
-}
-void rpi_gpio::rasspberry_model(model mdl)
-{
-    rpiModel = mdl;
+    close();
 }
 int rpi_gpio::printError(std::string error_mes)
 {
@@ -27,26 +23,10 @@ int rpi_gpio::printError(std::string error_mes)
     std::cout << error_mes << std::endl;
     return -1;
 }
-int rpi_gpio::checkPin(int gpioPin)
-{
-
-    for (int i = 0; i < 26; i++) {
-        if (gpioPin == RPI_GPIO[rpiModel][i]) {
-            return 1;
-        }
-    }
-    return 0;
-}
 int rpi_gpio::open(int gpioPin, std::string gpio_direction)
 {
     std::stringstream pinDir;
     pinDir << "/sys/class/gpio/gpio" << gpioPin;
-    if (rpiModel < 0) {
-        return printError("Unknown Raspberry Pi model!");
-    }
-    if (!checkPin(gpioPin)) {
-        return printError("GPIO pin error!");
-    }
     if ((gpio_direction != GPIO_DIR_IN) && (gpio_direction != GPIO_DIR_OUT)) {
         return printError("GPIO direction error! Pin: " + gpioPin);
     }
@@ -60,59 +40,54 @@ int rpi_gpio::open(int gpioPin, std::string gpio_direction)
     pinDir << "/direction";
     file.open(pinDir.str().c_str(), std::ios_base::in);
     if (!file.is_open()) {
-        close(gpioPin);
+        close();
+        gPin = -1;
         return printError("Error opening GPIO direction file!(Possibly you not have a root) " + pinDir.str());
     }
     file << gpio_direction;
     file.close();
 
-    activePin.push_back(gpioPin);
-
     return 1;
 }
-int rpi_gpio::close(int gpioPin)
+int rpi_gpio::close()
 {
-    if (!checkPin(gpioPin)) {
-        return printError("GPIO pin error!");
+    if( gPin == -1 ){
+        return printError("Error opening GPIO direction file!(Possibly you not have a root) ");
     }
     file.open("/sys/class/gpio/unexport", std::ios_base::in);
     if (!file.is_open()) {
         return printError("Error opening GPIO unexport file!");
     }
-    file << gpioPin;
+    file << gPin;
     file.close();
     return 1;
 }
-int rpi_gpio::write(int gpioPin, bool value)
+int rpi_gpio::write(bool value)
 {
     std::stringstream pinDir;
-    pinDir << "/sys/class/gpio/gpio" << gpioPin << "/value";
-    if (!checkPin(gpioPin)) {
-        return printError("GPIO pin error!");
+    pinDir << "/sys/class/gpio/gpio" << gPin << "/value";
+    if( gPin == -1 ){
+        return printError("Error opening GPIO direction file!(Possibly you not have a root) " + pinDir.str());
     }
-    for (int i = 0; i < activePin.size(); i++) {
-        if (gpioPin == activePin[i])
-            break;
-        else if (i == activePin.size())
-            return printError("Error, not remember a pin!");
-    }
-
     file.open(pinDir.str().c_str(), std::ios_base::in);
     char value_str[2] = { '0', '1' };
     if (!file.is_open()) {
-        return printError("Error opening value, pin " + gpioPin);
+        return printError("Error opening value, pin " + gPin);
     }
     file << value_str[value];
     file.close();
 
     return 1;
 }
-int rpi_gpio::read(int gpioPin)
+int rpi_gpio::read()
 {
     std::stringstream pinDir;
-    pinDir << "/sys/class/gpio/gpio" << gpioPin << "/value";
+    pinDir << "/sys/class/gpio/gpio" << gPin << "/value";
     std::ifstream file_v(pinDir.str().c_str());
     char value;
+    if( gPin == -1 ){
+        return printError("Error opening GPIO direction file!(Possibly you not have a root) ");
+    }
     if (!file_v.is_open()) {
         return printError("Error reading value " + pinDir.str());
     }
@@ -125,6 +100,6 @@ int rpi_gpio::read(int gpioPin)
         return 0;
     } else {
         file_v.close();
-        return printError("Unknown value in pin: " + gpioPin);
+        return printError("Unknown value in pin: " + gPin);
     }
 }
